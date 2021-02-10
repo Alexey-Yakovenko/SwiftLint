@@ -11,7 +11,12 @@ public struct Configuration {
     }
 
     /// The default file name to look for user-defined configurations.
-    public static let defaultFileName = ".swiftlint.yml"
+    public static let defaultFileName: String = {
+        if let envConfig = ProcessInfo.processInfo.environment["SWIFTLINT_CONFIG"] {
+            return envConfig
+        }
+        return ".swiftlint.yml"
+    }()
 
     // MARK: Public Instance
     /// The paths that should be included when linting
@@ -188,6 +193,7 @@ public struct Configuration {
         // Store whether there are custom configuration files; use default config file name if there are none
         let hasCustomConfigurationFiles: Bool = configurationFiles.isNotEmpty
         let configurationFiles = configurationFiles.isEmpty ? [Configuration.defaultFileName] : configurationFiles
+
         defer { basedOnCustomConfigurationFiles = hasCustomConfigurationFiles }
 
         let rootDirectory = FileManager.default.currentDirectoryPath.bridge().absolutePathStandardized()
